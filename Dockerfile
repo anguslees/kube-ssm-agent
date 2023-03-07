@@ -54,10 +54,6 @@ RUN yum install -y /root/amazon-ssm-agent.rpm && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-COPY sts-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/sts-entrypoint.sh
-
 WORKDIR /opt/amazon/ssm/
 
-ENTRYPOINT ["sts-entrypoint.sh"]
 CMD ["amazon-ssm-agent", "start"]

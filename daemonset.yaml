@@ -29,8 +29,7 @@ spec:
       - effect: NoSchedule
         operator: Exists
       containers:
-      - image: alexeiled/aws-ssm-agent
-        imagePullPolicy: Always
+      - image: ghcr.io/anguslees/aws-ssm-agent
         name: ssm-agent
         securityContext:
           runAsUser: 0
@@ -39,29 +38,34 @@ spec:
         # Allows systemctl to communicate with the systemd running on the host
         - name: dbus
           mountPath: /var/run/dbus
+          readOnly: true
         - name: run-systemd
           mountPath: /run/systemd
+          readOnly: true
         # Allows to peek into systemd units that are baked into the official EKS AMI
         - name: etc-systemd
           mountPath: /etc/systemd
+          readOnly: true
         # This is needed in order to fetch logs NOT managed by journald
         # journallog is stored only in memory by default, so we need
         #
         # If all you need is access to persistent journals, /var/log/journal/* would be enough
-        # FYI, the volatile log store /var/run/journal was empty on my nodes. Perhaps it isn't used in Amazon Linux 2 / EKS AMI?
         # See https://askubuntu.com/a/1082910 for more background
         - name: var-log
           mountPath: /var/log
+          readOnly: true
         - name: var-run
           mountPath: /var/run
+          readOnly: true
         - name: run
           mountPath: /run
+          readOnly: true
         - name: usr-lib-systemd
           mountPath: /usr/lib/systemd
+          readOnly: true
         - name: etc-machine-id
           mountPath: /etc/machine-id
-        - name: etc-sudoers
-          mountPath: /etc/sudoers.d
+          readOnly: true
       volumes:
       # for systemctl to systemd access
       - name: dbus
@@ -103,8 +107,3 @@ spec:
         hostPath:
           path: /etc/machine-id
           type: File
-      # Avoid this error > ERROR [MessageGatewayService] Failed to add ssm-user to sudoers file: open /etc/sudoers.d/ssm-agent-users: no such file or directory
-      - name: etc-sudoers
-        hostPath:
-          path: /etc/sudoers.d
-          type: Directory

@@ -1,4 +1,4 @@
-[![](https://github.com/alexei-led/kube-ssm-agent/workflows/Docker%20Image%20CI/badge.svg)](https://github.com/alexei-led/kube-ssm-agent/actions?query=workflow%3A"Docker+Image+CI") [![](https://github.com/alexei-led/kube-ssm-agent/workflows/Check%20SSM%20Release/badge.svg)](https://github.com/alexei-led/kube-ssm-agent/actions?query=workflow%3A"Check+SSM+Release") [![Docker Pulls](https://img.shields.io/docker/pulls/alexeiled/aws-ssm-agent.svg?style=popout)](https://hub.docker.com/r/alexeiled/aws-ssm-agent) [![](https://images.microbadger.com/badges/image/alexeiled/aws-ssm-agent.svg)](https://microbadger.com/images/alexeiled/aws-ssm-agent "Get your own image badge on microbadger.com")
+[![](https://github.com/anguslees/kube-ssm-agent/workflows/Docker%20Image%20CI/badge.svg)](https://github.com/anguslees/kube-ssm-agent/actions?query=workflow%3A"Docker+Image+CI") [![](https://github.com/anguslees/kube-ssm-agent/workflows/Check%20SSM%20Release/badge.svg)](https://github.com/anguslees/kube-ssm-agent/actions?query=workflow%3A"Check+SSM+Release")
 
 # kube-ssm-agent
 
@@ -56,7 +56,7 @@ spec:
     spec:
       serviceAccountName: ssm-sa
       containers:
-      - image: alexeiled/aws-ssm-agent
+      - image: ghcr.io/anguslees/aws-ssm-agent
         name: ssm-agent
         ...
 ```
