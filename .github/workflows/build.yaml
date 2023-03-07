@@ -6,15 +6,25 @@ on:
       - '*'
     tags:
       - '*'
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
 
 jobs:
 
   build:
  
-    runs-on: ubuntu-18.04
- 
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: get ssm version
       id: get_ssm
@@ -23,27 +33,37 @@ jobs:
         echo "::debug::get ssm version ${version}"
         echo "::set-output name=version::${version}"
 
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: |
+          ghcr.io/${{ github.repository_owner }}/kube-ssm-agent
+        tags: |
+          type=schedule
+          type=ref,event=branch
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
+          type=raw,value=${{ steps.get_ssm.outputs.version }}
+
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v2
       
     - name: Set up Docker buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Login to DockerHub
-      uses: docker/login-action@v1 
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      uses: docker/setup-buildx-action@v2
 
     - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Cache Docker layers
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache
       with:
         path: /tmp/.buildx-cache
@@ -53,20 +73,16 @@ jobs:
 
     - name: Build and push Docker image
       id: docker_build
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v4
       with:
         build-args: SSM_VERSION=${{ steps.get_ssm.outputs.version }}
         platforms: linux/amd64,linux/arm64
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
-        tags: |
-          ${{ secrets.DOCKER_USERNAME }}/aws-ssm-agent:${{ steps.get_ssm.outputs.version }}
-          ${{ secrets.DOCKER_USERNAME }}/aws-ssm-agent:latest
-          ghcr.io/${{ github.repository_owner }}/aws-ssm-agent:${{ steps.get_ssm.outputs.version }}
-          ghcr.io/${{ github.repository_owner }}/aws-ssm-agent:latest
-        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        push: ${{ github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/renovate/') }}
 
     - name: image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
-
  
