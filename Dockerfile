@@ -23,11 +23,6 @@ RUN mkdir -p github.com/aws && \
 
 WORKDIR /root/go/src/github.com/aws/amazon-ssm-agent
 
-RUN go get golang.org/x/tools/cmd/goimports && \
-    export PATH=$PATH:/root/go/bin && \
-    gofmt -w agent/plugins/inventory/gatherers/application/dataProvider_unix_test.go && \
-    goimports -w agent/plugins/inventory/gatherers/application/dataProvider.go
-
 RUN if [ "amd64" == "${TARGETARCH}" ]; then go mod vendor; make build-linux package-rpm; fi
 RUN if [ "arm64" == "${TARGETARCH}" ]; then go mod vendor; make build-arm64 package-rpm-arm64; fi
 

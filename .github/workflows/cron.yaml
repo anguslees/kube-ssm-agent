@@ -17,7 +17,7 @@ jobs:
       run: |
         ssm_version=$(curl --silent https://api.github.com/repos/aws/amazon-ssm-agent/releases/latest | jq -r .tag_name)
         echo ::set-output name=ssm_version::${ssm_version}
-        echo ::debug::ssm "latest release ${ssm_version}""
+        echo ::debug::ssm "latest release ${ssm_version}"
     
     - uses: actions/checkout@v3
 
