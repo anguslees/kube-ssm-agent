@@ -10,6 +10,8 @@ jobs:
   check_release:
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: get latest Amazon SSM release
